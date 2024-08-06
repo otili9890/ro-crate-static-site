@@ -35,8 +35,8 @@ program.addOption(new Option("-o, --out [out]", "Output to a different directory
 
 
 async function main (program) {
-    const crate = new ROCrate(fs.readJSONSync(Path.join(program.crateDir, "ro-crate-metadata.json")),{array: true, link: true})
-    const types = ["Dataset", "Person", "RepositoryObject", "DefinedTerm"]
+    const crate = new ROCrate(fs.readJSONSync(Path.join(program.crateDir, "ro-crate-metadata.json")), {array: true, link: true})
+    const defaultTypePages = ["Person", "RepositoryObject", "DefinedTerm"]
 
     //const data = new CrateData(crate, {types: types})
     //await data.load();

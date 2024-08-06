@@ -5,12 +5,9 @@
   "description": "Tools for extracting data from RO-Crates, including HTML pages and CSV",
   "main": "index.js",
   "scripts": {
-    "start": "npm-run-all -p dev:*",
-    "build": "run-s build:*",
-    "dev:11ty": "eleventy --serve",
-    "dev:css": "tailwindcss -i assets/tailwind.css -o dist/style.css  --watch --postcss",
-    "build:11ty": "eleventy",
-    "build:css": "tailwindcss -i assets/tailwind.css -o dist/style.css --postcss"
+    "test": "mocha",
+    "cooee": "node index.js test_data/edaa  ; npx @11ty/eleventy"
+  
   },
   "author": "",
   "license": "ISC",
@@ -22,9 +19,7 @@
     "ro-crate": "^3.3.6"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.19",
-    "npm-run-all": "^4.1.5",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.3"
+    "chai": "^5.1.1",
+    "mocha": "^10.7.0"
   }
 }

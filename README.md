@@ -23,17 +23,14 @@ TODO
 
 ## Usage 
 
-To make an HTML source site for 11ty to process:
-
-Run index.js, passing in a crate path such as the COOEE corpus from the test data.
+To make an HTML site from the cooee corpues
 
 ```
-node index.js test_data/cooeee
+npm run cooee
 ```
 
 This will generate new HTML pages in src -- which will be used by eleventy to make a site in dist
 
-To make the site and start up a dev webserver:  `npm start`
 
 
 To change the look of the site edit the template(s) (there's only one for now) in [`_includes/base.njk`](._includes/base.njk)
