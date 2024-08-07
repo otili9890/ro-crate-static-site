@@ -53,7 +53,7 @@
 
 
 
-{% macro menuItem(item) %}
+{% macro display(item) %}
 
     <table class="table-auto align-text-top align-text-left"">
         <caption >  {{ title  }}  </caption>
@@ -87,7 +87,7 @@
                             {{ val["@value"] }}
                           {% else %}
                               
-                               {{ menuItem(val) }}
+                               {{ display(val) }}
                               
                          {% endif %}
                         </div>
@@ -112,12 +112,12 @@
 {{ content | safe }}
 
 
-{{ menuItem(data) }}
+{{ display(data.ids[data.entryPoint])}}
 
 
 <h1>REVERSE</h1>
 
-{{ menuItem(reverse) }}
+{{ display(reverse) }}
 
       
 <script>
