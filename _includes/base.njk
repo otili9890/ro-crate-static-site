@@ -6,24 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     <style>
-      ul.long {
+      .long {
          overflow: scroll;
-          max-height: 200px
+          max-height: 200px;
+          background-color: yellow;
       }
-  .list {
-    overflow: scroll;
-
-  }
-
   </style>
 
 
-<link rel="stylesheet" href="{{ '/style.css' }}">
 
 
 <script>
-
-  
   function search(input) {
     li = input.parentNode.getElementsByTagName("div");
 
@@ -34,15 +27,67 @@
           txtValue = li[i].textContent.toUpperCase() || "";
           if (txtValue.indexOf(filter) > -1) {
               li[i].style.display = "";
-              found ++;
+              found ++
           } else {
               li[i].style.display = "none";
           }
        
     }
-    input.parentNode.getElementsByClassName("count")[0].innerText = ` ${found - 1} /  ${count}`
+    input.parentNode.getElementsByClassName("count")[0].innerText =  found - 1 /  count
 }
+
+function show(id) {
+  // Get all entities in the document
+  const entities = document.getElementsByClassName("entity");
+
+  // Loop through all entities
+  for (let i = 0; i < entities.length; i++) {
+    // Check if the table's id matches the specified id
+    console.log(entities[i].classList)
+    if (entities[i].classList.contains("home") || !entities[i].id) {
+            // Show the table if the id matches
+            entities[i].style.display = "";
+            entities[i].style.backgroundColor = "yellow";
+
+    } else if ( entities[i].id === id) {
+            // Show the table if the id matches
+            entities[i].style.display = "";
+            entities[i].style.width = "60%";
+            entities[i].style.height = "80%";
+            entities[i].style.backgroundColor = "pink";
+            entities[i].style.marginTop = "20px"; // Adjust as needed to position near the top
+            entities[i].scrollIntoView({ behavior: "smooth", block: "start" });
+
+            entities[i].style.position = "fixed";
+            entities[i].style.top = "20px"; // Adjust as needed to position near the top
+            entities[i].style.left = "10%"; // Center the element horizontally
+            entities[i].style.zIndex = "1000"; // Ensure the element is on top of other elements
+
+            // Create a close button
+            const closeButton = document.createElement("button");
+            closeButton.innerText = "X";
+            closeButton.style.position = "absolute";
+            closeButton.style.top = "10px";
+            closeButton.style.right = "10px";
+            closeButton.style.zIndex = "1001"; // Ensure the button is on top of the div
+            closeButton.onclick = function() {
+            entities[i].style.display = "none";
+      };
+
+      // Append the close button to the div
+      entities[i].appendChild(closeButton);
+
+            
+          } else {
+            // Hide the table if the id does not match
+            entities[i].style.display = "none";
+          }
+  }
+}
+
 </script>
+
+
 
 </head>
 
@@ -54,15 +99,23 @@
 
 
 {% macro display(item) %}
+{% if item["@id"]  == data.entryPoint %}
+  {% set homeClass = "home" %}
+{% else %}
+  {% set homeClass = "" %}
+{% endif %}
 
-    <table class="table-auto align-text-top align-text-left"">
-        <caption >  {{ title  }}  </caption>
-        {% for prop, vals in item %}
+<div class="entity {{homeClass}}"  id="{{item["@id"] | urlencode}}" display="">
+
+    <table>
+      
+       {% for prop, vals in item %}
          <tr> 
-               <th class="bg-slate-100 align-text-top align-text-left"">  <button class="rounded-lg w-full"> {{ prop }}  </button> </th>
-               <td class="align-text-top align-text-left">
-
-                {% if vals is string %} 
+               <th >  {{ prop  }}  </th>
+               <td >
+                {% if prop == "@reverse"  %}
+                    {{ display(vals, true) }}
+                {% elif vals is string %} 
 
                      {{ vals }}
 
@@ -71,7 +124,7 @@
                   
                    <input class="border" onkeyup="res = search(this)">
                       <span class="count"> ({{ vals.length }})</span>
-                      <div class="overflow-scroll h-64">
+                      <div class="long">
                     
                     {% else %}
                     <div>
@@ -81,18 +134,19 @@
                          {% if val is string %}   
                             {{ val }} 
                           {% elif val["@path"] %}     
-                            <button class="font-bold py-2 px-4 rounded bg-blue-500 text-white"><a href="{{val["@path"]}}"> {{ val["@value"] }} </a></button>
-                          
-                          {% elif val["@value"] %} 
-                            {{ val["@value"] }}
+                            <button style="border: 1 "><a href="{{val["@path"]}}"> {{ val["@value"] }} </a></button>
                           {% else %}
-                              
-                               {{ display(val) }}
-                              
-                         {% endif %}
+                            {% if val["@id"] %} 
+                              <button style="border: 1 "><a href="#{{ val["@id"] }}" onclick='show("{{val["@id"] | urlencode }}")'> ---> {{ val["@value"]  }}  {{ val["@id"]  }} </a></button>
+                            {% elif val["@value"] %} 
+                              {{ val["@value"] }}
+                            {% else %}
+                                WARNING SOMETHING WENT WRONG {{ val }}
+                            {% endif %}
+                          {% endif %}
                         </div>
                     {%  endfor %}
-                                            </div>
+                 </div>
 
                   </td>
                
@@ -101,32 +155,45 @@
 
         {% endfor %}
     </table>
+{% set htmlRegex = r/(\.txt)$|(\.html?)$/i %}
+{% set audioRegex = r/(\.mp3)|(\.ogg?)|(\.wav)$/i %}
+{% set imgRegex = r/(\.jpe?g)|(\.png|(\.giff?))$/i   %}
+{%  set pdfRegex = r/pdf$/i %}
+
+{% if item._relPath %}
+ {{ item["@id"] }}
+        {% if   htmlRegex.test(item["@id"])  %}
+            <iframe src='{{item._relPath}}' width='100%' height='500'></iframe>
+        {% elif  audioRegex.test(item["@id"])  %} 
+            <audio controls><source src="{{ item._relPath }}"/></audio>
+        {% elif   imgRegex.test(item["@id"])  %} 
+          <img width='100%' style='object-fit: contain' src="{{ item._relPath }}"/>
+        {% elif  pdfRegex.test(item["@id"]) %}
+          <embed  src="{{ item._relPath }}" type="application/pdf" width="100%" height="600px" />
+ {% endif %}
+ {% endif %}
+</div>
 
 {% endmacro %}
 
 
 
-
-  <a href="{{ home_link }}">🏠 Home</a>
+<a href="{{ home_link }}">🏠 Home</a>
 
 {{ content | safe }}
 
 
-{{ display(data.ids[data.entryPoint])}}
+
+{% for prop, entity in data.ids %}
+      {{ display(entity) }}
+ {% endfor %}
 
 
-<h1>REVERSE</h1>
-
-{{ display(reverse) }}
 
       
 <script>
-
-
+show("{{ data.entryPoint | urlencode}}")
 </script>
 
-  </body>
-
-
-
+</body>
 </html>

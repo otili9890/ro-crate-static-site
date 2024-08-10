@@ -7,7 +7,6 @@
   "scripts": {
     "test": "mocha",
     "cooee": "node index.js test_data/edaa  ; npx @11ty/eleventy"
-  
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +14,7 @@
     "@11ty/eleventy": "^2.0.1",
     "eleventy": "^1.0.6",
     "fs-extra": "^11.2.0",
+    "jsonpath": "^1.1.1",
     "level": "^8.0.1",
     "ro-crate": "^3.3.6"
   },
