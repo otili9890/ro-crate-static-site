@@ -9,8 +9,40 @@
       .long {
          overflow: scroll;
           max-height: 200px;
-          background-color: yellow;
+          background-color: green;
       }
+      .entity {
+      display: none;
+      width: 80%;
+      height: 80%;
+      position: fixed;
+      top: 100px;
+      left: 10%;
+      z-index: 1000;
+      background-color: pink;
+      border: 1px solid #ccc;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .entity:target {
+      display: block;
+    }
+      .home {
+        background-color: yellow;
+        display: block;
+      }
+
+      .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1001;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
   </style>
 
 
@@ -37,21 +69,24 @@
 }
 
 function show(id) {
+
+  return;
+
+
   // Get all entities in the document
   const entities = document.getElementsByClassName("entity");
 
   // Loop through all entities
   for (let i = 0; i < entities.length; i++) {
     // Check if the table's id matches the specified id
-    console.log(entities[i].classList)
     if (entities[i].classList.contains("home") || !entities[i].id) {
             // Show the table if the id matches
-            entities[i].style.display = "";
+            entities[i].style.display = "block";
             entities[i].style.backgroundColor = "yellow";
 
     } else if ( entities[i].id === id) {
             // Show the table if the id matches
-            entities[i].style.display = "";
+            entities[i].style.display = "block";
             entities[i].style.width = "60%";
             entities[i].style.height = "80%";
             entities[i].style.backgroundColor = "pink";
@@ -105,8 +140,11 @@ function show(id) {
   {% set homeClass = "" %}
 {% endif %}
 
-<div class="entity {{homeClass}}"  id="{{item["@id"] | urlencode}}" display="">
+<div class="entity {{homeClass}}"  id="{{item["@id"] | urlencode}}">
+{% if not(homeClass) %}
+  <a href="#" class="close-button">X</a>
 
+{% endif %}
     <table>
       
        {% for prop, vals in item %}
@@ -137,7 +175,7 @@ function show(id) {
                             <button style="border: 1 "><a href="{{val["@path"]}}"> {{ val["@value"] }} </a></button>
                           {% else %}
                             {% if val["@id"] %} 
-                              <button style="border: 1 "><a href="#{{ val["@id"] }}" onclick='show("{{val["@id"] | urlencode }}")'> ---> {{ val["@value"]  }}  {{ val["@id"]  }} </a></button>
+                              <button style="border: 1 "><a href="#{{val["@id"] | urlencode }}" onclick='show("{{val["@id"] | urlencode }}")'> ---> {{ val["@value"]  or  val["@id"]  }} </a></button>
                             {% elif val["@value"] %} 
                               {{ val["@value"] }}
                             {% else %}
@@ -163,13 +201,13 @@ function show(id) {
 {% if item._relPath %}
  {{ item["@id"] }}
         {% if   htmlRegex.test(item["@id"])  %}
-            <iframe src='{{item._relPath}}' width='100%' height='500'></iframe>
+            <iframe src='{{item._relPath}}' type="text/plain" width='100%' height='500'         loading="lazy"></iframe>
         {% elif  audioRegex.test(item["@id"])  %} 
             <audio controls><source src="{{ item._relPath }}"/></audio>
         {% elif   imgRegex.test(item["@id"])  %} 
-          <img width='100%' style='object-fit: contain' src="{{ item._relPath }}"/>
+          <img width='100%' style='object-fit: contain' src="{{ item._relPath }}" loading="lazy"/>
         {% elif  pdfRegex.test(item["@id"]) %}
-          <embed  src="{{ item._relPath }}" type="application/pdf" width="100%" height="600px" />
+          <iframe   src="{{ item._relPath }}" type="application/pdf" width="100%" height="600px" loading="lazy" />
  {% endif %}
  {% endif %}
 </div>

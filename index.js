@@ -19,7 +19,8 @@ const config = {
     "RepositoryObject",
     "DefinedTerm",
     "File", "Dataset"
-  ]
+  ],
+  xpages: []
 }
 
 var crateDir;
