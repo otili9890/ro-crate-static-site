@@ -39,12 +39,17 @@ The current approach (which may change) is to turn an RO-Crate into a series of 
 
 ## Usage 
 
-To make an HTML site from the cooee corpus
+To make an HTML site from the sample dataset
+
+```
+npm run sample
+```
+
+or to run the larger COOEE corpus dataset
 
 ```
 npm run cooee
 ```
-
 This will:
 
 - Write out a set of .md files into `./tmp` (deleting `./tmp` first)
@@ -53,7 +58,7 @@ This will:
 If you have made some markdown file and want to play with the template then to get a web server running, run:
 
 ```
-npx @11ty/eleventy --serve
+npm run serve
 ```
 
 

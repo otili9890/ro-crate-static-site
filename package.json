@@ -6,7 +6,10 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "cooee": "rm -rf tmp ; rm -rf dist ; node index.js test_data/cooee  ; npx @11ty/eleventy"
+    "cooee": "rm -rf tmp ; rm -rf dist ; node index.js test_data/cooee  ; npx @11ty/eleventy",
+    "sample": "rm -rf tmp ; rm -rf dist ; node index.js test_data/sample  ; npx @11ty/eleventy",
+    "serve":  "npx @11ty/eleventy --serve"
+
   },
   "author": "",
   "license": "ISC",
