@@ -1,53 +1,49 @@
 import { expect } from 'chai';
 import fs from 'fs-extra';
 import Path from 'path';
-import { Page } from '../lib/html.js'; 
+import { Page, HTML } from '../lib/html.js';
+import {ROCrate} from 'ro-crate';
+import { rootCertificates } from 'tls';
+import standardConfig from '../lib/config.js'; // Adjust the path as necessary
+
+
 describe('Page Class', () => {
   let mockCrate;
   let mockHTML;
   let mockEntity;
 
   beforeEach(() => {
-    mockHTML = { rootPage: 'root.html', path: 'some/path' };
-    mockEntity = { "@id": "entity1", "@reverse": {} };
-    mockCrate = {
-      rootDataset: { "@id": "root" },
-      getEntity: () => {},
-      getTree: () => ({}),
-    };
   });
 
-  it('constructor initializes properties correctly', () => {
-    const page = new Page(mockHTML, mockEntity, mockCrate);
-    expect(page.html).to.equal(mockHTML);
-    expect(page.entity).to.equal(mockEntity);
-  });
 
-  it('getData method processes data correctly', () => {
-    mockEntity["@reverse"] = {
-      "relation": [
-        { "@id": "related1", "name": ["Related Entity 1"], "@type": "Type1" },
-        { "@id": "related2", "@type": "Type2" }
-      ]
-    };
-    const page = new Page(mockHTML, mockEntity, mockCrate);
-    page.getData();
-    expect(page.reverse).to.have.property('relation');
-    expect(page.reverse.relation).to.be.an('array').that.has.lengthOf(2);
-    expect(page.reverse.relation[0]).to.deep.equal({ "@id": "related1", name: "Related Entity 1", "@type": "Type1" });
-    expect(page.reverse.relation[1]).to.deep.equal({ "@id": "related2", name: "related2", "@type": "Type2" });
-  });
 
-  it('render method creates the correct template', () => {
-    const page = new Page(mockHTML, mockEntity, mockCrate);
-    page.displayData = { some: 'data' };
-    page.reverse = { some: 'reverse' };
+
+  it('should render an RO-Crate correctly', () => {
+    const crate = new ROCrate({array: true, link: true});
+    crate.rootDataset.name = "Test Crate";
+    crate.rootDataset.description = "This is a test crate";
+    crate.rootDataset.author = {"@id": "https://orcid.org/some_id", "@type": "Person", "name": "Test Author"};
+    
+    for (let i = 1; i <= 100; i++) {
+      const file = {
+        "@id": `file${i}`,
+        "@type": "Dataset",
+        "name": `Test File ${i}`
+      };
+      crate.addValues(crate.rootDataset, "hasPart", file);
+    }
+   
+
+    const html = new HTML(crate, standardConfig, "test", "_tmp", "_dist");
+                
+    const page = new Page(html, crate.rootDataset, crate);
+
     const template = page.render();
-    console.log(template);
-    expect(template).to.include('title: "entity1"');
+    console.log(template)
+
+    expect(template).to.include('title: "Test Crate"');
     expect(template).to.include('layout: base.njk');
-    expect(template).to.include('home_link: ../../../root.html');
-    expect(template).to.include('data: {"some":"data"}');
-    expect(template).to.include('reverse: {"some":"reverse"}');
+    expect(template).to.include('home_link: index.html');
+    expect(template).to.include(' {"entryPoint":"./"');
   });
 });

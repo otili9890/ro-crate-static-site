@@ -6,34 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     <style>
+      h2.id {
+        text-align: right;
+      }
       .long {
          overflow: scroll;
           max-height: 200px;
           background-color: green;
       }
       .entity {
-      display: none;
-      width: 80%;
-      height: 80%;
-      position: fixed;
-      top: 100px;
-      left: 10%;
-      z-index: 1000;
-      background-color: pink;
-      border: 1px solid #ccc;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: none;
+        position: fixed;
+        top: 10%;
+        width: 80%;
+        min-height: 100%;
+        z-index: 1000;
+        background-color: pink;
+        border: 1px solid #ccc;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
     .entity:target {
       display: block;
     }
-      .home {
-        background-color: yellow;
-        display: block;
-      }
 
-      .close-button {
+    .home {
+      background-color: yellow;
+      display: block;
+      position: static;
+    }
+
+.navigation {
+  background-color: #007BFF; /* Bootstrap primary blue */
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  display: block;
+        position: static;
+
+}
+ 
+
+    .close-button {
       position: absolute;
       top: 10px;
       right: 10px;
@@ -51,7 +66,6 @@
 <script>
   function search(input) {
     li = input.parentNode.getElementsByTagName("div");
-
     filter = input.value.toUpperCase();
     count = li.length;
     found = 0;
@@ -62,8 +76,7 @@
               found ++
           } else {
               li[i].style.display = "none";
-          }
-       
+          }    
     }
     input.parentNode.getElementsByClassName("count")[0].innerText =  found - 1 /  count
 }
@@ -131,34 +144,36 @@ function show(id) {
   <body>
 
 
+{% macro value(vals) %}
+    {% for val in vals %}
+          {{ val["@value"] }}
+    {% endfor %}
 
 
-{% macro display(item) %}
+{% endmacro %}
+
+{% macro display(item, navigationClass) %}
+
 {% if item["@id"]  == data.entryPoint %}
   {% set homeClass = "home" %}
 {% else %}
-  {% set homeClass = "" %}
+  {% set homeClass = navigationClass %}
 {% endif %}
+
 
 <div class="entity {{homeClass}}"  id="{{item["@id"] | urlencode}}">
 {% if not(homeClass) %}
   <a href="#" class="close-button">X</a>
-
 {% endif %}
-    <table>
-      
-       {% for prop, vals in item %}
-         <tr> 
-               <th >  {{ prop  }}  </th>
-               <td >
-                {% if prop == "@reverse"  %}
-                    {{ display(vals, true) }}
-                {% elif vals is string %} 
 
-                     {{ vals }}
+  <h2 class="id">{{ item["@id"] }}</h2>
 
-                 {% else %}
-                    {% if vals.length > 9 %}
+  <h1>{{ item["@type"] }} {{ value(item.props["http://schema.org/name"].data) }} </h1>  
+    {% if item.props %}
+      {% for prop, propData in item.props %}
+        <div>
+          <h2>{{ propData.label }}</h2>
+            {% if propData.data.length > 9 %}
                   
                    <input class="border" onkeyup="res = search(this)">
                       <span class="count"> ({{ vals.length }})</span>
@@ -166,50 +181,83 @@ function show(id) {
                     
                     {% else %}
                     <div>
-                     {% endif %}
-                    {% for val in vals %}
+                     
+            {% endif %}
+
+          {% for val in propData.data %}
+            <div>
+              {% if val is string %}
+                {{ val }}
+              {% elif val["@path"] %}
+                <button style="border: 1"><a href="{{ val["@path"] }}"> {{ val["@value"] }} </a></button>
+              {% else %}
+                {% if val["@id"] %}
+                  <button style="border: 1"><a href="#{{ val["@id"] | urlencode }}" onclick='show("{{ val["@id"] | urlencode }}")'> {{ val["@value"] or val["@id"] }} </a></button>
+                {% elif val["@value"] %}
+                  {{ val["@value"] }}
+                {% else %}
+                  WARNING SOMETHING WENT WRONG {{ val | dump }}
+                {% endif %}
+              {% endif %}
+            </div>
+          {% endfor %}
+          </div>
+          </div>
+          {% if propData.reverse.length > 9 %}
+                  
+                   <input class="border" onkeyup="res = search(this)">
+                      <span class="count"> ({{ vals.length }})</span>
+                      <div class="long">
+                    
+                    {% else %}
                     <div>
-                         {% if val is string %}   
-                            {{ val }} 
-                          {% elif val["@path"] %}     
-                            <button style="border: 1 "><a href="{{val["@path"]}}"> {{ val["@value"] }} </a></button>
-                          {% else %}
-                            {% if val["@id"] %} 
-                              <button style="border: 1 "><a href="#{{val["@id"] | urlencode }}" onclick='show("{{val["@id"] | urlencode }}")'> ---> {{ val["@value"]  or  val["@id"]  }} </a></button>
-                            {% elif val["@value"] %} 
-                              {{ val["@value"] }}
-                            {% else %}
-                                WARNING SOMETHING WENT WRONG {{ val }}
-                            {% endif %}
-                          {% endif %}
-                        </div>
-                    {%  endfor %}
-                 </div>
+                     
+            {% endif %}
 
-                  </td>
-               
-                 {% endif %}
-          </tr>
-
-        {% endfor %}
-    </table>
+          {% for val in propData.reverse %}
+            <div>
+              {% if val is string %}
+               ⬅ {{ val }}
+              {% elif val["@path"] %}
+                ⬅ <button style="border: 1"><a href="{{ val["@path"] }}"> {{ val["@value"] }} </a></button>
+              {% else %}
+                {% if val["@id"] %}
+                 ⬅ <button style="border: 1"><a href="#{{ val["@id"] | urlencode }}" onclick='show("{{ val["@id"] | urlencode }}")'> {{ val["@value"] or val["@id"] }} </a></button>
+                {% elif val["@value"] %}
+                  ⬅ {{ val["@value"] }}
+                {% else %}
+                  ⬅ WARNING SOMETHING WENT WRONG {{ val | dump }} ⬅
+                {% endif %}
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    
+    
+    {% else %}
+      WARNING: No properties found in item
+    {% endif %}
+ 
+   
 {% set htmlRegex = r/(\.txt)$|(\.html?)$/i %}
 {% set audioRegex = r/(\.mp3)|(\.ogg?)|(\.wav)$/i %}
 {% set imgRegex = r/(\.jpe?g)|(\.png|(\.giff?))$/i   %}
 {%  set pdfRegex = r/pdf$/i %}
 
-{% if item._relPath %}
+{% if item._.relPath %}
  {{ item["@id"] }}
         {% if   htmlRegex.test(item["@id"])  %}
-            <iframe src='{{item._relPath}}' type="text/plain" width='100%' height='500'         loading="lazy"></iframe>
+            <iframe src='{{item._.relPath}}' type="text/plain" width='100%' height='500'         loading="lazy"></iframe>
         {% elif  audioRegex.test(item["@id"])  %} 
-            <audio controls><source src="{{ item._relPath }}"/></audio>
+            <audio controls><source src="{{ item._.relPath }}"/></audio>
         {% elif   imgRegex.test(item["@id"])  %} 
-          <img width='100%' style='object-fit: contain' src="{{ item._relPath }}" loading="lazy"/>
+          <img width='100%' style='object-fit: contain' src="{{ item._.relPath }}" loading="lazy"/>
         {% elif  pdfRegex.test(item["@id"]) %}
-          <iframe   src="{{ item._relPath }}" type="application/pdf" width="100%" height="600px" loading="lazy" />
+          <iframe   src="{{ item._.relPath }}" type="application/pdf" width="100%" height="600px" loading="lazy" />
  {% endif %}
  {% endif %}
+
 </div>
 
 {% endmacro %}
@@ -220,7 +268,9 @@ function show(id) {
 
 {{ content | safe }}
 
-
+{% if nav.props  %}
+    {{ display(nav, "navigation") }}
+{% endif %}
 
 {% for prop, entity in data.ids %}
       {{ display(entity) }}
