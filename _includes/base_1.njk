@@ -12,19 +12,19 @@
       .long {
          overflow: scroll;
           max-height: 200px;
-          background-color: #79A38D;
-          padding: 0.5%;
-          border-radius: 0 5px 5px 5px; 
+          background-color: green;
       }
       .entity {
         display: none;
         position: fixed;
         top: 10%;
-        padding: 1%;
-        margin: 0.5% 0;
-        border-radius: 5px;
+        width: 80%;
         min-height: 100%;
-        background-color: #91A96D;
+        z-index: 1000;
+        background-color: pink;
+        border: 1px solid #ccc;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
     .entity:target {
@@ -32,14 +32,16 @@
     }
 
     .home {
-      background-color: #FFCC79;
+      background-color: yellow;
       display: block;
       position: static;
     }
 
 .navigation {
-  background-color: #537EC0; /* Bootstrap primary blue */
+  background-color: #007BFF; /* Bootstrap primary blue */
   color: white;
+  padding: 10px;
+  border-radius: 5px;
   display: block;
         position: static;
 
@@ -56,28 +58,6 @@
       font-size: 20px;
       cursor: pointer;
     }
-
-    .home_link {
-    background-color: #4CAF50; 
-    color: white; 
-    padding: 10px 32px; 
-    text-align: center; 
-    text-decoration: none; 
-    display: inline-block; 
-    font-size: 18px; 
-    margin: 8px 0 0 0; 
-    border-radius: 6px; 
-    transition: background-color 0.3s; /* Smooth transition for background color */
-}
-
-.home_link:hover {
-    background-color: #45a049; /* Darker green on hover */
-}
-
-body {
-  width: 98%;
-  margin: auto;
-}
   </style>
 
 
@@ -115,7 +95,7 @@ function show(id) {
     if (entities[i].classList.contains("home") || !entities[i].id) {
             // Show the table if the id matches
             entities[i].style.display = "block";
-            entities[i].style.backgroundColor = #FFCC79;
+            entities[i].style.backgroundColor = "yellow";
 
     } else if ( entities[i].id === id) {
             // Show the table if the id matches
@@ -185,9 +165,6 @@ function show(id) {
 {% if not(homeClass) %}
   <a href="#" class="close-button">X</a>
 {% endif %}
-{% if homeClass == 'navigation' %}
-  <h1>Navigation</h1>
-{% endif %}
 
   <h2 class="id">{{ item["@id"] }}</h2>
 
@@ -195,27 +172,27 @@ function show(id) {
     {% if item.props %}
       {% for prop, propData in item.props %}
         <div>
-          {% if propData %}
-            <h2>{{ propData.label }}</h2>
-              {% if propData.data.length > 9 %}
-                    <input class="border" placeholder="Search" onkeyup="res = search(this)">
-                        <span class="count"> (Results: {{ vals.length }})</span>
-                        <div class="long">
-                      
-                      {% else %}
-                      <div>
-                      
-              {% endif %}
-          {% endif %}
+          <h2>{{ propData.label }}</h2>
+            {% if propData.data.length > 9 %}
+                  
+                   <input class="border" onkeyup="res = search(this)">
+                      <span class="count"> ({{ vals.length }})</span>
+                      <div class="long">
+                    
+                    {% else %}
+                    <div>
+                     
+            {% endif %}
+
           {% for val in propData.data %}
             <div>
               {% if val is string %}
                 {{ val }}
               {% elif val["@path"] %}
-                <button><a href="{{ val["@path"] }}">Test {{ val["@value"] or val["@path"] }} </a></button>
+                <button style="border: 1"><a href="{{ val["@path"] }}"> {{ val["@value"] }} </a></button>
               {% else %}
                 {% if val["@id"] %}
-                  <button><a href="#{{ val["@id"] | urlencode }}" onclick='show("{{ val["@id"] | urlencode }}")'> {{ val["@value"] or val["@id"] }} </a></button>
+                  <button style="border: 1"><a href="#{{ val["@id"] | urlencode }}" onclick='show("{{ val["@id"] | urlencode }}")'> {{ val["@value"] or val["@id"] }} </a></button>
                 {% elif val["@value"] %}
                   {{ val["@value"] }}
                 {% else %}
@@ -240,16 +217,16 @@ function show(id) {
           {% for val in propData.reverse %}
             <div>
               {% if val is string %}
-                {{ val }}
+               ⬅ {{ val }}
               {% elif val["@path"] %}
-                <button style="border: 1"><a href="{{ val["@path"] }}"> {{ val["@value"] }} </a></button>
+                ⬅ <button style="border: 1"><a href="{{ val["@path"] }}"> {{ val["@value"] }} </a></button>
               {% else %}
                 {% if val["@id"] %}
-                 <button style="border: 1"><a href="#{{ val["@id"] | urlencode }}" onclick='show("{{ val["@id"] | urlencode }}")'> {{ val["@value"] or val["@id"] }} </a></button>
+                 ⬅ <button style="border: 1"><a href="#{{ val["@id"] | urlencode }}" onclick='show("{{ val["@id"] | urlencode }}")'> {{ val["@value"] or val["@id"] }} </a></button>
                 {% elif val["@value"] %}
-                  {{ val["@value"] }}
+                  ⬅ {{ val["@value"] }}
                 {% else %}
-                  WARNING SOMETHING WENT WRONG {{ val | dump }}
+                  ⬅ WARNING SOMETHING WENT WRONG {{ val | dump }} ⬅
                 {% endif %}
               {% endif %}
             </div>
@@ -261,11 +238,7 @@ function show(id) {
     {% else %}
       WARNING: No properties found in item
     {% endif %}
-
-    {% if homeClass != "navigation" %}
-      <a href="{{ home_link }}" class="home_link">Go back</a>
-    {% endif %}
-  
+ 
    
 {% set htmlRegex = r/(\.txt)$|(\.html?)$/i %}
 {% set audioRegex = r/(\.mp3)|(\.ogg?)|(\.wav)$/i %}
@@ -273,6 +246,7 @@ function show(id) {
 {%  set pdfRegex = r/pdf$/i %}
 
 {% if item._.relPath %}
+ {{ item["@id"] }}
         {% if   htmlRegex.test(item["@id"])  %}
             <iframe src='{{item._.relPath}}' type="text/plain" width='100%' height='500'         loading="lazy"></iframe>
         {% elif  audioRegex.test(item["@id"])  %} 
@@ -290,7 +264,7 @@ function show(id) {
 
 
 
-<a class="home_link" href="{{ home_link }}">🏠 Home</a>
+<a href="{{ home_link }}">🏠 Home</a>
 
 {{ content | safe }}
 
