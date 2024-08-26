@@ -62,7 +62,7 @@ npm run serve
 ```
 
 
-To change the look of the site edit the template(s) (there's only one for now) in [`_includes/base.njk`](._includes/base.njk)
+To change the look of the site edit the template in [`_includes/base.njk`](._includes/base.njk). To use a different template rename the existing base.njk to something else and name the template base.njk. 
 
 This will (Warning: not test by other people yet):
 

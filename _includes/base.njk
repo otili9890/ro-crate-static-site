@@ -115,7 +115,7 @@ function show(id) {
     if (entities[i].classList.contains("home") || !entities[i].id) {
             // Show the table if the id matches
             entities[i].style.display = "block";
-            entities[i].style.backgroundColor = #FFCC79;
+            entities[i].style.backgroundColor = "#FFCC79";
 
     } else if ( entities[i].id === id) {
             // Show the table if the id matches
@@ -199,7 +199,7 @@ function show(id) {
             <h2>{{ propData.label }}</h2>
               {% if propData.data.length > 9 %}
                     <input class="border" placeholder="Search" onkeyup="res = search(this)">
-                        <span class="count"> (Results: {{ vals.length }})</span>
+                        <span class="count"> Results {{ vals.length }}</span>
                         <div class="long">
                       
                       {% else %}
@@ -212,12 +212,12 @@ function show(id) {
               {% if val is string %}
                 {{ val }}
               {% elif val["@path"] %}
-                <button><a href="{{ val["@path"] }}">Test {{ val["@value"] or val["@path"] }} </a></button>
+                <button><a href="{{ val["@path"] }}"> {{ val["@value"] or val["@path"] }} </a></button>
               {% else %}
                 {% if val["@id"] %}
                   <button><a href="#{{ val["@id"] | urlencode }}" onclick='show("{{ val["@id"] | urlencode }}")'> {{ val["@value"] or val["@id"] }} </a></button>
                 {% elif val["@value"] %}
-                  {{ val["@value"] }}
+                  ➡ {{ val["@value"] }}
                 {% else %}
                   WARNING SOMETHING WENT WRONG {{ val | dump }}
                 {% endif %}
